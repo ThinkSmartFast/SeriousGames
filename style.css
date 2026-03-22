@@ -1,1 +1,18 @@
+body{
+font-family:Georgia,serif;
 
+/* Romantic layered background */
+background:
+radial-gradient(circle at 20% 30%, rgba(255, 230, 230, 0.6), transparent 40%),
+radial-gradient(circle at 80% 70%, rgba(255, 240, 220, 0.6), transparent 40%),
+linear-gradient(135deg,#f5e6e8,#e8d5c4,#d6c0a8);
+
+/* Optional subtle texture (very light) */
+background-blend-mode: soft-light;
+
+margin:0;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
