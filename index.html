@@ -1,229 +1,663 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Interview with Jane Austen</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fortune &amp; Reputation – A Jane Austen Serious Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<style>
+    :root {
+      --panel: rgba(255, 252, 247, 0.92);
+      --panel-strong: rgba(255, 249, 240, 0.98);
+      --border: #c9b08f;
+      --text: #2f2a26;
+      --accent: #7a5f45;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+    }
 
-body{
-font-family:Georgia,serif;
-background:linear-gradient(135deg,#e6d8c3,#bfa98a);
-margin:0;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(33, 24, 18, 0.28), rgba(33, 24, 18, 0.28)),
+        url("image.jpg") center center / cover no-repeat fixed;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 32px 14px;
+    }
 
-.game{
-width:600px;
-background:#fffaf3;
-padding:30px;
-border-radius:12px;
-box-shadow:0 10px 25px rgba(0,0,0,0.25);
-}
+    .game-container {
+      width: min(980px, 100%);
+      background: var(--panel);
+      border: 1px solid rgba(201, 176, 143, 0.9);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(5px);
+      overflow: hidden;
+    }
 
-h2{
-text-align:center;
-margin-top:0;
-}
+    .header {
+      padding: 24px 26px 18px;
+      text-align: center;
+      border-bottom: 1px solid rgba(201, 176, 143, 0.55);
+      background: linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0.2));
+    }
 
-.dialogue{
-background:#f5efe5;
-padding:15px;
-border-radius:8px;
-min-height:120px;
-margin-bottom:20px;
-}
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
 
-button{
-display:block;
-width:100%;
-margin:8px 0;
-padding:10px;
-border:none;
-border-radius:6px;
-background:#7b5e57;
-color:white;
-font-size:15px;
-cursor:pointer;
-}
+    .subtitle {
+      margin-top: 8px;
+      font-style: italic;
+      color: #6a5745;
+      font-size: 0.98rem;
+    }
 
-button:hover{
-background:#5e4742;
-}
+    .quote-bar {
+      margin: 14px auto 0;
+      max-width: 760px;
+      padding: 10px 14px;
+      border-left: 4px solid var(--border);
+      background: rgba(255, 250, 242, 0.85);
+      color: #5f4a3a;
+      font-style: italic;
+      line-height: 1.5;
+      font-size: 0.96rem;
+    }
 
-.restart{
-background:#3a6ea5;
-}
+    .content {
+      padding: 20px 22px 24px;
+    }
 
-</style>
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 0 16px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(201, 176, 143, 0.45);
+    }
+
+    .season-label {
+      font-size: 0.92rem;
+      color: #6c5a49;
+    }
+
+    .stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: rgba(255, 250, 243, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.92rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .stat-label {
+      font-weight: bold;
+      color: #685443;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.8rem;
+    }
+
+    .stat-value {
+      font-weight: bold;
+      margin-left: 5px;
+    }
+
+    .stat.money .stat-value::before {
+      content: "£";
+    }
+
+    .panel,
+    .ending-panel {
+      background: var(--panel-strong);
+      border: 1px solid rgba(201, 176, 143, 0.85);
+      border-radius: 14px;
+      padding: 18px 18px 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .scene-title,
+    .ending-title {
+      margin: 0 0 8px;
+      color: #4d3c2f;
+    }
+
+    .scene-meta,
+    .ending-type {
+      color: #7c6754;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .scene-text,
+    .ending-panel p {
+      line-height: 1.7;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .choices {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice-btn {
+      width: 100%;
+      border: 1px solid #c6ab8d;
+      background: rgba(255, 251, 245, 0.97);
+      color: #352b24;
+      padding: 12px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+      font-family: inherit;
+      font-size: 0.98rem;
+    }
+
+    .choice-btn:hover {
+      transform: translateY(-1px);
+      background: #f4e3ce;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    }
+
+    .choice-main {
+      flex: 1;
+    }
+
+    .choice-impact {
+      white-space: nowrap;
+      color: #7b644e;
+      font-size: 0.82rem;
+      align-self: center;
+    }
+
+    .log-wrap {
+      margin-top: 16px;
+    }
+
+    .log-title {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      color: #4d3c2f;
+    }
+
+    .log {
+      background: rgba(255, 251, 246, 0.95);
+      border: 1px dashed rgba(201, 176, 143, 0.95);
+      border-radius: 12px;
+      padding: 12px;
+      max-height: 160px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #6a5746;
+    }
+
+    .log-entry {
+      margin-bottom: 10px;
+    }
+
+    .log-entry:last-child {
+      margin-bottom: 0;
+    }
+
+    .log-entry .label {
+      font-weight: bold;
+      color: #4d3c2f;
+    }
+
+    .restart-btn {
+      margin-top: 16px;
+      border: 1px solid #b99570;
+      background: #f2dfc6;
+      color: #3b2f25;
+      padding: 10px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    .restart-btn:hover {
+      background: #e8cfad;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 14px;
+        background-attachment: scroll;
+      }
+
+      .content {
+        padding: 16px;
+      }
+
+      .choice-btn {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .choice-impact {
+        white-space: normal;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="game-container">
+    <div class="header">
+      <h1>Fortune &amp; Reputation</h1>
+      <div class="subtitle">A Jane Austen-inspired serious game of manners, money, and moral choice.</div>
+      <div class="quote-bar" id="quote-bar">
+        “I declare after all there is no enjoyment like reading!” — Pride and Prejudice
+      </div>
+    </div>
 
-<div class="game">
+    <div class="content">
+      <div class="top-bar">
+        <div class="season-label">Regency England · Social Season <span id="season-number">1</span></div>
+        <div class="stats">
+          <div class="stat money"><span class="stat-label">Money</span><span class="stat-value" id="stat-money">50</span></div>
+          <div class="stat"><span class="stat-label">Reputation</span><span class="stat-value" id="stat-reputation">50</span></div>
+          <div class="stat"><span class="stat-label">Happiness</span><span class="stat-value" id="stat-happiness">50</span></div>
+        </div>
+      </div>
 
-<h2>🎙 Interview with Jane Austen</h2>
+      <div id="scene-panel" class="panel">
+        <h2 class="scene-title" id="scene-title">Welcome to the Season</h2>
+        <div class="scene-meta" id="scene-meta">You enter society with limited means and many expectations.</div>
+        <div class="scene-text" id="scene-text"></div>
+        <div class="choices" id="choices"></div>
+      </div>
 
-<div class="dialogue" id="text">
-You find yourself in a quiet Regency drawing room.  
-Before you sits the renowned novelist, Miss Jane Austen.
-</div>
+      <div id="ending-panel" class="ending-panel hidden">
+        <div class="ending-type" id="ending-type"></div>
+        <h3 class="ending-title" id="ending-title"></h3>
+        <p id="ending-text"></p>
+        <button class="restart-btn" id="restart-btn">Begin a new season</button>
+      </div>
 
-<div id="choices"></div>
+      <div class="log-wrap">
+        <h3 class="log-title">Recent consequences</h3>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+  </div>
 
-</div>
+  <script>
+    const state = {
+      money: 50,
+      reputation: 50,
+      happiness: 50,
+      season: 1,
+      sceneId: "intro",
+      finished: false
+    };
 
-<script>
+    const quotePool = [
+      { text: "“I declare after all there is no enjoyment like reading!”", source: "Pride and Prejudice" },
+      { text: "“It is a truth universally acknowledged...”", source: "Pride and Prejudice" },
+      { text: "“One half of the world cannot understand the pleasures of the other.”", source: "Emma" },
+      { text: "“There is nothing like staying at home for real comfort.”", source: "Emma" },
+      { text: "“My idea of good company is the company of clever, well-informed people.”", source: "Persuasion" },
+      { text: "“We are all fools in love.”", source: "Pride and Prejudice" }
+    ];
 
-const story = {
+    const scenes = {
+      intro: {
+        title: "Arrival in Meryton",
+        meta: "Your family has placed you in the care of relatives for the season.",
+        text: `
+          <p>Your aunt has arranged a discreet introduction to society. You are young, observant, and not entirely secure in fortune.</p>
+          <p>As Austen reminds us, “It is a truth universally acknowledged...” and in your case, the truth is that every choice will carry social consequences.</p>
+          <p>An invitation arrives for a ball hosted by a wealthy and respected family.</p>
+        `,
+        options: [
+          {
+            id: "accept-ball",
+            label: "Accept the invitation and prepare carefully.",
+            impact: { money: -5, reputation: 5, happiness: 5 },
+            nextScene: "ball"
+          },
+          {
+            id: "decline-ball",
+            label: "Decline politely and remain at home.",
+            impact: { money: 0, reputation: -5, happiness: -3 },
+            nextScene: "after-decline"
+          }
+        ]
+      },
+      ball: {
+        title: "Invitation to the Ball",
+        meta: "A night of music, conversation, and careful observation.",
+        text: `
+          <p>You enter the candlelit room with a mixture of hope and caution. Every glance, curtsy, and remark may be remembered.</p>
+          <p>As Austen writes, “One half of the world cannot understand the pleasures of the other.” You are determined to understand everyone in the room, and perhaps to be understood in return.</p>
+          <p>How will you behave?</p>
+        `,
+        options: [
+          {
+            id: "respectful",
+            label: "Attend and behave with grace and respect.",
+            impact: { money: -5, reputation: 15, happiness: 5 },
+            nextScene: "after-ball"
+          },
+          {
+            id: "fashion",
+            label: "Attend and display expensive fashion.",
+            impact: { money: -15, reputation: 10, happiness: 2 },
+            nextScene: "after-ball"
+          },
+          {
+            id: "rude",
+            label: "Refuse rudely and mock the event.",
+            impact: { money: 0, reputation: -20, happiness: 2 },
+            nextScene: "gossip"
+          }
+        ]
+      },
+      "after-ball": {
+        title: "The Morning After",
+        meta: "Your conduct is already being discussed in drawing rooms.",
+        text: `
+          <p>The evening has ended, but its effects continue. A little civility has gone far, though so has every unguarded word.</p>
+          <p>Remember Austen’s warning: “We are all fools in love.” You now hear that a young suitor has taken interest in you, but his intentions remain unclear.</p>
+        `,
+        options: [
+          {
+            id: "humble",
+            label: "Respond with humility and kindness.",
+            impact: { money: 0, reputation: 10, happiness: 5 },
+            nextScene: "proposal"
+          },
+          {
+            id: "vain",
+            label: "Boast about your success and admire yourself too openly.",
+            impact: { money: 0, reputation: -10, happiness: 3 },
+            nextScene: "proposal"
+          }
+        ]
+      },
+      "after-decline": {
+        title: "Early Murmurs",
+        meta: "Your absence has not gone unnoticed.",
+        text: `
+          <p>Some say you are shy. Others say you are proud. In Austen’s world, those distinctions are everything.</p>
+          <p>You recall: “There is nothing like staying at home for real comfort.” Yet comfort may not be the same as success.</p>
+        `,
+        options: [
+          {
+            id: "repair",
+            label: "Make polite calls to restore your standing.",
+            impact: { money: -5, reputation: 10, happiness: -2 },
+            nextScene: "proposal"
+          },
+          {
+            id: "withdraw",
+            label: "Withdraw further into solitude and books.",
+            impact: { money: 0, reputation: -10, happiness: 5 },
+            nextScene: "gossip"
+          }
+        ]
+      },
+      gossip: {
+        title: "Whispers and Gossip",
+        meta: "Rumours gather speed in the hands of the idle and curious.",
+        text: `
+          <p>A careless remark has been repeated in a less flattering form. You are now known for either wit or imprudence, depending on who tells the story.</p>
+          <p>Austen’s novels repeatedly show that reputation can be lost in a moment and recovered only with effort.</p>
+        `,
+        options: [
+          {
+            id: "apologize",
+            label: "Offer a sincere apology to the offended family.",
+            impact: { money: 0, reputation: 5, happiness: -2 },
+            nextScene: "proposal"
+          },
+          {
+            id: "defend",
+            label: "Refuse to apologise and defend your conduct.",
+            impact: { money: 0, reputation: -15, happiness: 3 },
+            nextScene: "ending"
+          }
+        ]
+      },
+      proposal: {
+        title: "A Question of Marriage",
+        meta: "Two very different futures stand before you.",
+        text: `
+          <p>One suitor offers wealth, security, and social approval. Another offers affection, humility, and uncertain means.</p>
+          <p>In Austen’s world, love and prudence rarely arrive together. Your decision will reveal which matters most to you.</p>
+        `,
+        options: [
+          {
+            id: "wealth",
+            label: "Accept the wealthy, respectable proposal.",
+            impact: { money: 25, reputation: 10, happiness: -5 },
+            nextScene: "ending"
+          },
+          {
+            id: "love",
+            label: "Choose love over fortune.",
+            impact: { money: -10, reputation: 5, happiness: 20 },
+            nextScene: "ending"
+          },
+          {
+            id: "independent",
+            label: "Refuse both and remain independent.",
+            impact: { money: -5, reputation: 0, happiness: 5 },
+            nextScene: "ending"
+          }
+        ]
+      }
+    };
 
-start:{
-text:`"Pray, do sit down," says Jane Austen with a curious smile.
-"What would you ask a humble novelist?"`,
-choices:[
-{label:"Ask about her writing",next:"writing"},
-{label:"Ask about romance in society",next:"romance"},
-{label:"Ask what she thinks of Bridgerton",next:"bridgerton_intro"}
-]
-},
+    function clampScore(value) {
+      return Math.max(0, Math.min(100, value));
+    }
 
-writing:{
-text:`"Writing is my chief delight," she says.
-"Though the world believes ladies should concern themselves only with tea and marriage."`,
-choices:[
-{label:"Ask about Pride and Prejudice",next:"pride"},
-{label:"Ask about modern TV adaptations",next:"bridgerton_intro"}
-]
-},
+    function determineEnding() {
+      const { money, reputation, happiness } = state;
 
-romance:{
-text:`She raises an eyebrow.
+      if (reputation < 25 && money < 30) {
+        return {
+          type: "Losing ending",
+          title: "Social Ruin",
+          text: "The season ends badly. Invitations cease, caution turns to censure, and society remembers your name for all the wrong reasons."
+        };
+      }
 
-"Society speaks endlessly of romance, yet it is character that determines happiness."`,
-choices:[
-{label:"Ask if love should defy class",next:"class"},
-{label:"Ask about modern romantic dramas",next:"bridgerton_intro"}
-]
-},
+      if (reputation >= 70 && money >= 60 && happiness >= 50) {
+        return {
+          type: "Winning ending",
+          title: "The Esteemed Match",
+          text: "You have achieved the rare balance Austen values: respect, stability, and genuine affection. Your conduct has earned admiration, and your future appears secure."
+        };
+      }
 
-pride:{
-text:`"Miss Bennet and Mr Darcy have quite taken on a life of their own," she laughs.
+      if (money >= 70 && reputation <= 40) {
+        return {
+          type: "Partial success",
+          title: "Fortune Without Respect",
+          text: "You are wealthy, but not warmly regarded. In spite of comfort, society meets you with reserve rather than affection."
+        };
+      }
 
-"I merely observed the follies of society."`,
-choices:[
-{label:"Ask if she enjoys modern adaptations",next:"bridgerton_intro"},
-{label:"End interview politely",next:"end_polite"}
-]
-},
+      if (reputation >= 70 && money <= 40) {
+        return {
+          type: "Partial success",
+          title: "Beloved but Poor",
+          text: "You are admired and trusted, yet your finances remain modest. You have won esteem, though not ease."
+        };
+      }
 
-class:{
-text:`"To marry for affection is admirable," she says,
-"but society is not always so accommodating."`,
-choices:[
-{label:"Mention Bridgerton",next:"bridgerton_intro"},
-{label:"Thank her for her insight",next:"end_polite"}
-]
-},
+      return {
+        type: "Quiet success",
+        title: "A Comfortable Life",
+        text: "You end the season with a balanced measure of security and esteem. It is not a triumph of drama, but a triumph of judgment."
+      };
+    }
 
-bridgerton_intro:{
-text:`You mention the popular series Bridgerton.
+    const moneyEl = document.getElementById("stat-money");
+    const repEl = document.getElementById("stat-reputation");
+    const happyEl = document.getElementById("stat-happiness");
+    const seasonEl = document.getElementById("season-number");
 
-Miss Austen pauses thoughtfully.
+    const scenePanel = document.getElementById("scene-panel");
+    const sceneTitleEl = document.getElementById("scene-title");
+    const sceneMetaEl = document.getElementById("scene-meta");
+    const sceneTextEl = document.getElementById("scene-text");
+    const choicesEl = document.getElementById("choices");
 
-"A drama of balls, gossip, and courtship, you say?"`,
-choices:[
-{label:"Tell her it captures Regency society well",next:"bridgerton_positive"},
-{label:"Tell her it exaggerates drama and scandal",next:"bridgerton_critical"},
-{label:"Ask if she would write for television",next:"bridgerton_writer"}
-]
-},
+    const endingPanelEl = document.getElementById("ending-panel");
+    const endingTypeEl = document.getElementById("ending-type");
+    const endingTitleEl = document.getElementById("ending-title");
+    const endingTextEl = document.getElementById("ending-text");
+    const restartBtn = document.getElementById("restart-btn");
 
-bridgerton_positive:{
-text:`She smiles politely.
+    const logEl = document.getElementById("log");
+    const quoteBar = document.getElementById("quote-bar");
 
-"If it encourages audiences to enjoy stories of society and courtship,
-then I suppose it has its merit.
+    function updateStatsDisplay() {
+      moneyEl.textContent = state.money;
+      repEl.textContent = state.reputation;
+      happyEl.textContent = state.happiness;
+      seasonEl.textContent = state.season;
+    }
 
-Though I confess my own style relies somewhat more upon irony."`,
-choices:[
-{label:"Ask if she would improve it",next:"bridgerton_writer"},
-{label:"End the interview",next:"end_success"}
-]
-},
+    function updateQuote() {
+      const q = quotePool[Math.floor(Math.random() * quotePool.length)];
+      quoteBar.textContent = `${q.text} — ${q.source}`;
+    }
 
-bridgerton_critical:{
-text:`A mischievous spark appears in her eye.
+    function addLogEntry(option, impact) {
+      const entry = document.createElement("div");
+      entry.className = "log-entry";
 
-"Exaggerated scandal? My dear interviewer,
-society provides enough absurdity without embellishment."`,
-choices:[
-{label:"Ask what she would change",next:"bridgerton_writer"},
-{label:"End interview laughing",next:"end_success"}
-]
-},
+      const effects = [];
+      if (impact.money) effects.push(`Money ${impact.money > 0 ? "+" : ""}${impact.money}`);
+      if (impact.reputation) effects.push(`Reputation ${impact.reputation > 0 ? "+" : ""}${impact.reputation}`);
+      if (impact.happiness) effects.push(`Happiness ${impact.happiness > 0 ? "+" : ""}${impact.happiness}`);
 
-bridgerton_writer:{
-text:`She considers carefully.
+      entry.innerHTML = `<span class="label">Choice:</span> ${option.label}<br><span style="font-size:.84rem; color:#7a6450;">Effects: ${effects.join(", ") || "none"}</span>`;
+      logEl.prepend(entry);
+    }
 
-"If I were to write such a drama,
-I would ensure wit and character triumph over spectacle.
+    function renderScene() {
+      if (state.sceneId === "ending") {
+        const ending = determineEnding();
+        scenePanel.classList.add("hidden");
+        endingPanelEl.classList.remove("hidden");
+        endingTypeEl.textContent = ending.type;
+        endingTitleEl.textContent = ending.title;
+        endingTextEl.textContent = ending.text;
+        return;
+      }
 
-A sharp conversation is often more powerful than a grand ball."`,
-choices:[
-{label:"Thank her for the interview",next:"end_success"}
-]
-},
+      const scene = scenes[state.sceneId];
+      scenePanel.classList.remove("hidden");
+      endingPanelEl.classList.add("hidden");
 
-end_polite:{
-text:`You thank Jane Austen for her time.
+      sceneTitleEl.textContent = scene.title;
+      sceneMetaEl.textContent = scene.meta;
+      sceneTextEl.innerHTML = scene.text;
 
-She nods graciously.
+      choicesEl.innerHTML = "";
+      scene.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
 
-"Conversation, like a good novel, must know when to conclude."`,
-choices:[
-{label:"Play again",next:"start"}
-]
-},
+        const main = document.createElement("span");
+        main.className = "choice-main";
+        main.textContent = `${String.fromCharCode(65 + i)}. ${opt.label}`;
 
-end_success:{
-text:`Jane Austen smiles warmly.
+        const impact = document.createElement("span");
+        impact.className = "choice-impact";
+        const parts = [];
+        if (opt.impact.money) parts.push(`£ ${opt.impact.money > 0 ? "+" : ""}${opt.impact.money}`);
+        if (opt.impact.reputation) parts.push(`Rep ${opt.impact.reputation > 0 ? "+" : ""}${opt.impact.reputation}`);
+        if (opt.impact.happiness) parts.push(`Happy ${opt.impact.happiness > 0 ? "+" : ""}${opt.impact.happiness}`);
+        impact.textContent = parts.join(" · ");
 
-"I believe our interview would make a most entertaining chapter indeed."
+        btn.appendChild(main);
+        btn.appendChild(impact);
+        btn.addEventListener("click", () => handleChoice(opt));
+        choicesEl.appendChild(btn);
+      });
+    }
 
-You leave the drawing room feeling rather accomplished.`,
-choices:[
-{label:"Interview again",next:"start"}
-]
-}
+    function applyImpact(impact) {
+      state.money = clampScore(state.money + (impact.money || 0));
+      state.reputation = clampScore(state.reputation + (impact.reputation || 0));
+      state.happiness = clampScore(state.happiness + (impact.happiness || 0));
+    }
 
-}
+    function handleChoice(option) {
+      if (state.finished) return;
+      applyImpact(option.impact || {});
+      addLogEntry(option, option.impact || {});
+      updateStatsDisplay();
+      updateQuote();
 
-function render(node){
+      if (option.nextScene === "ending") {
+        state.sceneId = "ending";
+        state.finished = true;
+      } else {
+        state.sceneId = option.nextScene;
+      }
 
-document.getElementById("text").innerText = story[node].text
+      renderScene();
+    }
 
-const choicesDiv = document.getElementById("choices")
-choicesDiv.innerHTML=""
+    function restartGame() {
+      state.money = 50;
+      state.reputation = 50;
+      state.happiness = 50;
+      state.season += 1;
+      state.sceneId = "intro";
+      state.finished = false;
+      logEl.innerHTML = "";
+      updateStatsDisplay();
+      updateQuote();
+      renderScene();
+    }
 
-story[node].choices.forEach(choice=>{
+    restartBtn.addEventListener("click", restartGame);
 
-const btn = document.createElement("button")
-btn.innerText = choice.label
-
-btn.onclick = ()=>render(choice.next)
-
-choicesDiv.appendChild(btn)
-
-})
-
-}
-
-render("start")
-
-</script>
-
+    updateStatsDisplay();
+    updateQuote();
+    renderScene();
+  </script>
 </body>
 </html>
